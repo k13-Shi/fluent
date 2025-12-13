@@ -867,6 +867,115 @@ task.spawn(function()
     end
 end)
 
+local AutoTradeFolder = FarmingTab:AddFolder("Auto Trade")
+
+local tradedPlayers = {}
+local targetTradePlayerName = ""
+local tradeActive = false
+
+local tradeRequestRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("tradeRequest") 
+local addItemRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("addItemToTrade")
+local confirmTradeRemote = ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("confirmTrade")
+
+local function getSixPets()
+    local pets = {}
+    local petFolder = player:FindFirstChild("pets") 
+
+    if petFolder then
+        for i, pet in ipairs(petFolder:GetChildren()) do
+            if #pets < 6 and pet:IsA("StringValue") then
+                table.insert(pets, pet.Value)
+            end
+        end
+    end
+    return pets
+end
+
+local function teleportToPlayer(targetPlayer)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local targetChar = targetPlayer.Character
+    
+    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
+        local targetHRP = targetChar.HumanoidRootPart
+        hrp.CFrame = targetHRP.CFrame * CFrame.new(0, 0, -5)
+        return true
+    end
+    return false
+end
+
+local function autoTradeRoutine()
+    tradeActive = true
+    
+    while tradeActive do
+        local allPlayers = Players:GetPlayers()
+        local availablePlayers = {}
+
+        for _, p in ipairs(allPlayers) do
+            if p.Name ~= player.Name and not tradedPlayers[p.Name] and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(availablePlayers, p)
+            end
+        end
+
+        if #availablePlayers > 0 then
+            local targetPlayer = availablePlayers[math.random(1, #availablePlayers)]
+            local targetName = targetPlayer.Name
+
+            AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: Trading " .. targetName
+            
+            local success = teleportToPlayer(targetPlayer)
+
+            if success and tradeRequestRemote then
+                tradeRequestRemote:InvokeServer(targetPlayer) 
+                task.wait(1)
+
+                local petsToSend = getSixPets()
+                if #petsToSend == 6 and addItemRemote then
+                    for _, petID in ipairs(petsToSend) do
+                        addItemRemote:InvokeServer("Pet", petID)
+                        task.wait(0.1)
+                    end
+                end
+                task.wait(1)
+
+                if confirmTradeRemote then
+                    confirmTradeRemote:InvokeServer()
+                    task.wait(0.5)
+                    confirmTradeRemote:InvokeServer()
+                end
+
+                tradedPlayers[targetName] = true
+                AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: Traded " .. targetName .. ". Looking for new target."
+                task.wait(2)
+            else
+                AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: Target too far or Remotes not found."
+                task.wait(5)
+            end
+        else
+            AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: No untraded players found."
+            task.wait(5)
+        end
+    end
+    AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: Disabled"
+end
+
+AutoTradeFolder:AddLabel("Status: Disabled").Name = "TradeStatus"
+
+AutoTradeFolder:AddSwitch("Start Auto Trade", function(enabled)
+    if enabled then
+        if not tradeActive then
+            task.spawn(autoTradeRoutine)
+        end
+    else
+        tradeActive = false
+    end
+end)
+
+AutoTradeFolder:AddButton("Reset Traded List", function()
+    tradedPlayers = {}
+    AutoTradeFolder:GetLabel("TradeStatus").Text = "Status: Traded list reset."
+end)
+
 FarmingTab:AddDropdown("Change Time", function(selection)
     local lighting = game:GetService("Lighting")
     
