@@ -174,7 +174,7 @@ MainTab:AddDropdown("Workout Machine", function(machine) selectedWorkout = machi
 
 local rebirthValueLabel = FarmingTab:AddLabel("Rebirths: 0")
 rebirthValueLabel.TextSize = 17
-local targetLabel =  FarmingTab:AddLabel("Target: None")
+local targetLabel = FarmingTab:AddLabel("Target: None")
 targetLabel.TextSize = 17
 
 local targetRebirths = 0
@@ -230,5 +230,28 @@ task.spawn(function()
             end
         end
         task.wait(0.05)
+    end
+end)
+
+-- AUTO TELEPORT MUSCLE KING GYM (NEW FEATURE)
+local targetPositionKing = CFrame.new(-8665.4, 17.21, -5792.9) -- Muscle King Gym HRP Position
+local teleportActiveKing = false
+
+FarmingTab:AddSwitch("Auto Teleport: Muscle King", function(enabled)
+    teleportActiveKing = enabled
+end)
+
+task.spawn(function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    while true do
+        if teleportActiveKing then
+            -- Tinitiyak na lumayo lang ang player bago mag-teleport ulit
+            if (hrp.Position - targetPositionKing.Position).Magnitude > 5 then
+                hrp.CFrame = targetPositionKing
+            end
+        end
+        task.wait(0.5) -- Medyo mabagal para iwas DC
     end
 end)
