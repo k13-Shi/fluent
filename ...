@@ -20,39 +20,8 @@ local window = library:AddWindow(title, {
     can_resize = true,
 })
 
-local changeSpeedSizeRemote = ReplicatedStorage.rEvents.changeSpeedSizeRemote
-
-function gettool()
-    for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-        if v.Name == "Punch" and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-        end
-    end
-    game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
-    game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
-end
-
-local function formatNumber(num)
-    local numStr = tostring(num)
-    local formatted = ""
-    local counter = 0
-
-    for i = #numStr, 1, -1 do
-        counter = counter + 1
-        formatted = numStr:sub(i, i) .. formatted
-        if counter % 3 == 0 and i > 1 then
-            formatted = "," .. formatted
-        end
-    end
-    
-    return formatted
-end
-
--- =========================================================================
--- MAIN TAB (Tools and Machines)
--- =========================================================================
 local MainTab = window:AddTab("MainTab")
-MainTab:AddLabel("Utility & Tools").TextSize = 22
+MainTab:AddLabel("MainTab").TextSize = 22
 
 local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
     _G.AutoSpinWheel = bool
@@ -65,6 +34,8 @@ local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
         end)
     end
 end)
+
+local changeSpeedSizeRemote = ReplicatedStorage.rEvents.changeSpeedSizeRemote
 
 local userSize = 2
 local sizeActive = false
@@ -129,6 +100,16 @@ task.spawn(function()
 		task.wait(0.15)
 	end
 end)
+
+function gettool()
+    for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+        if v.Name == "Punch" and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+        end
+    end
+    game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch", "leftHand")
+    game:GetService("Players").LocalPlayer.muscleEvent:FireServer("punch", "rightHand")
+end
 
 local autoRockFolder = MainTab:AddFolder("Auto Rocks")
 
@@ -749,12 +730,8 @@ MainTab:AddSwitch("Start Machine Farm", function(enabled)
     working = enabled
 
     if enabled then
-        if selectedLocation and selectedWorkout and workoutPositions[selectedWorkout] and workoutPositions[selectedWorkout][selectedLocation] then
+        if selectedLocation and selectedWorkout and workoutPositions[selectedWorkout][selectedLocation] then
             teleportAndStartMachines(selectedWorkout, workoutPositions[selectedWorkout][selectedLocation])
-        else
-            warn("Error: Paki-pili muna ang Gym Location at Workout Machine.")
-            working = false
-            MainTab:GetSwitch("Start Machine Farm"):Set(false)
         end
     else
         stopAutoLiftMachines()
@@ -773,17 +750,29 @@ MainTab:AddDropdown("Workout Machine", function(machine)
     selectedWorkout = machine
 end):Add("Bench Press"):Add("Squat"):Add("Pull Up"):Add("Boulder")
 
--- =========================================================================
--- FARMING TAB (Rebirths & Utilities)
--- =========================================================================
-local FarmingTab = window:AddTab("Farming")
-FarmingTab:AddLabel("Rebirths & Farming Utilities").TextSize = 22
+MainTab:AddLabel("Rebirths:").TextSize = 22
 
-local rebirthValueLabel = FarmingTab:AddLabel("Rebirths: 0")
+local rebirthValueLabel = MainTab:AddLabel("Rebirths: 0")
 rebirthValueLabel.TextSize = 17
 
-local targetLabel =  FarmingTab:AddLabel("Target: None")
+local targetLabel =  MainTab:AddLabel("Target: None")
 targetLabel.TextSize = 17
+
+local function formatNumber(num)
+    local numStr = tostring(num)
+    local formatted = ""
+    local counter = 0
+
+    for i = #numStr, 1, -1 do
+        counter = counter + 1
+        formatted = numStr:sub(i, i) .. formatted
+        if counter % 3 == 0 and i > 1 then
+            formatted = "," .. formatted
+        end
+    end
+    
+    return formatted
+end
 
 local rebirths = rebirthsStat
 local targetRebirths = 0
@@ -802,14 +791,14 @@ local function autoRebirth()
     end
 end
 
-FarmingTab:AddTextBox("Set Rebirth Target", function(text)
+MainTab:AddTextBox("Set Rebirth Target", function(text)
     local val = tonumber(text)
     if val and val >= 0 then
         targetRebirths = val
     end
 end)
 
-rebirthSwitch = FarmingTab:AddSwitch("Auto Rebirth", function(enabled)
+rebirthSwitch = MainTab:AddSwitch("Auto Rebirth", function(enabled)
     if enabled then
         if targetRebirths > 0 and rebirths.Value < targetRebirths then
             task.spawn(autoRebirth)
@@ -831,7 +820,7 @@ end)
 
 local sizeActiveFarming = false
 
-local oneswitch = FarmingTab:AddSwitch("Auto Size 1", function(bool)
+local oneswitch = MainTab:AddSwitch("Auto Size 1", function(bool)
     sizeActiveFarming = bool
 end)
 
@@ -855,7 +844,7 @@ end)
 local targetPosition = CFrame.new(-8665.4, 17.21, -5792.9)
 local teleportActive = false
 
-local autokingswitch = FarmingTab:AddSwitch("Auto King Teleport", function(enabled)
+local autokingswitch = MainTab:AddSwitch("Auto King Teleport", function(enabled)
     teleportActive = enabled
 end)
 
@@ -873,7 +862,7 @@ task.spawn(function()
     end
 end)
 
-FarmingTab:AddDropdown("Change Time", function(selection)
+MainTab:AddDropdown("Change Time", function(selection)
     local lighting = game:GetService("Lighting")
     
     if selection == "Night" then
