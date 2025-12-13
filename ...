@@ -20,7 +20,7 @@ if not displayName or displayName == "" then
     displayName = player.Name
 end
 
-local title = ("Galaxy Shi Final Version | Welcome %s"):format(displayName)
+local title = ("K13 Shi Final Version | Welcome %s"):format(displayName)
 
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/CoronaBlanca/Lxbrxrys/refs/heads/main/Xlxrxxm"))()
 
@@ -54,15 +54,9 @@ local function formatNumber(num)
     return formatted
 end
 
--- UI TAB DECLARATION
 local MainTab = window:AddTab("MainTab")
 local FarmingTab = window:AddTab("Farming") 
 
--- =================================
--- MAIN TAB CONTENT
--- =================================
-
-MainTab:AddLabel("Utility & Tools").TextSize = 22
 
 MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
     _G.AutoSpinWheel = bool
@@ -137,7 +131,7 @@ autoRockFolder:AddSwitch("Tiny Rock (Dura 0)", function(Value)
     end)
 end)
 
-local autoEquipToolsFolder = MainTab:AddFolder("  Auto Equip Tools")
+local autoEquipToolsFolder = MainTab:AddFolder(" Auto Equip Tools")
 
 autoEquipToolsFolder:AddSwitch("Auto Weight", function(Value)
     _G.AutoWeight = Value
@@ -178,11 +172,6 @@ local locationDropdown = MainTab:AddDropdown("Gym Location", function(location) 
 for _, location in ipairs(workoutLocations) do locationDropdown:Add(location) end
 MainTab:AddDropdown("Workout Machine", function(machine) selectedWorkout = machine end):Add("Bench Press"):Add("Squat")
 
--- =================================
--- FARMING TAB CONTENT
--- =================================
-
-FarmingTab:AddLabel("Rebirths & Farming Utilities").TextSize = 22
 
 local rebirthValueLabel = FarmingTab:AddLabel("Rebirths: 0")
 rebirthValueLabel.TextSize = 17
