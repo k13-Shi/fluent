@@ -172,7 +172,6 @@ local locationDropdown = MainTab:AddDropdown("Gym Location", function(location) 
 for _, location in ipairs(workoutLocations) do locationDropdown:Add(location) end
 MainTab:AddDropdown("Workout Machine", function(machine) selectedWorkout = machine end):Add("Bench Press"):Add("Squat")
 
-
 local rebirthValueLabel = FarmingTab:AddLabel("Rebirths: 0")
 rebirthValueLabel.TextSize = 17
 local targetLabel =  FarmingTab:AddLabel("Target: None")
