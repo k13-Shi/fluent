@@ -61,19 +61,6 @@ local function removePortals()
 end
 removePortals()
 
-local blockedFrames = {
-    "strengthFrame",
-    "durabilityFrame",
-    "agilityFrame",
-}
-
-for _, name in ipairs(blockedFrames) do
-    local frame = ReplicatedStorage:FindFirstChild(name)
-    if frame and frame:IsA("GuiObject") then
-        frame.Visible = false
-    end
-end
-
 ReplicatedStorage.ChildAdded:Connect(function(child)
     if table.find(blockedFrames, child.Name) and child:IsA("GuiObject") then
         child.Visible = false
@@ -253,6 +240,18 @@ wLabel.Font = Enum.Font.Arcade
 
 MainTab:AddLabel("Settings:").TextSize = 22
 
+local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
+    _G.AutoSpinWheel = bool
+    
+    if bool then
+        spawn(function()
+            while _G.AutoSpinWheel and wait(1) do
+                game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
+            end
+        end)
+    end
+end)
+
 local changeSpeedSizeRemote = ReplicatedStorage.rEvents.changeSpeedSizeRemote
 
 local userSize = 2
@@ -319,28 +318,6 @@ task.spawn(function()
 	end
 end)
 
-local lockSwitch = MainTab:AddSwitch("Lock Position", function(state)
-    lockRunning = state
-    if lockRunning then
-        local player = game.Players.LocalPlayer
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-        local lockPosition = hrp.Position
-
-        lockThread = coroutine.create(function()
-            while lockRunning do
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                hrp.RotVelocity = Vector3.new(0, 0, 0)
-                hrp.CFrame = CFrame.new(lockPosition)
-                wait(0.05) 
-            end
-        end)
-
-        coroutine.resume(lockThread)
-    end
-end)
-lockSwitch:Set(false)
-
 MainTab:AddSwitch("Infinite Jump", function(bool)
     _G.InfiniteJump = bool
     
@@ -388,6 +365,63 @@ local function createAllParts()
 end
 task.spawn(createAllParts)
 
+MainTab:AddLabel("Important:").TextSize = 22
+
+local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
+    if bool then
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.P = 1250
+                bodyVelocity.Parent = rootPart
+            end
+        end
+    else
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
+                if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                    existingVelocity:Destroy()
+                end
+            end
+        end
+    end
+end)
+antiKnockbackSwitch:Set(true)
+
+local lockRunning = false
+local lockThread = nil
+
+local lockSwitch = MainTab:AddSwitch("Lock Position", function(state)
+    lockRunning = state
+    if lockRunning then
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        local lockPosition = hrp.Position
+
+        lockThread = coroutine.create(function()
+            while lockRunning do
+                hrp.Velocity = Vector3.new(0, 0, 0)
+                hrp.RotVelocity = Vector3.new(0, 0, 0)
+                hrp.CFrame = CFrame.new(lockPosition)
+                wait(0.05) 
+            end
+        end)
+
+        coroutine.resume(lockThread)
+    end
+end)
+lockSwitch:Set(false)
+
 local walkonwaterSwicth =MainTab:AddSwitch("Walk on Water", function(bool)
     for _, part in ipairs(parts) do
         if part and part.Parent then
@@ -396,19 +430,6 @@ local walkonwaterSwicth =MainTab:AddSwitch("Walk on Water", function(bool)
     end
 end)
 walkonwaterSwicth:Set(true)
-
-
-local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
-    _G.AutoSpinWheel = bool
-    
-    if bool then
-        spawn(function()
-            while _G.AutoSpinWheel and wait(1) do
-                game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
-            end
-        end)
-    end
-end)
 
 local timeDropdown = MainTab:AddDropdown("Change Time", function(selection)
     local lighting = game:GetService("Lighting")
@@ -1499,12 +1520,12 @@ task.spawn(function()
     end
 end)
 
-MainTab:AddLabel("Tools:").TextSize = 22
+FarmingTab:AddLabel("Tools:").TextSize = 22
 
 local SelectedMode = nil
 local AutoFarm = false
 
-local modeDropdown = MainTab:AddDropdown("Select Tool", function(selection)
+local modeDropdown = FarmingTab:AddDropdown("Select Tool", function(selection)
     SelectedMode = selection
 end)
 
@@ -1542,7 +1563,7 @@ local function fastPunch(player)
     end
 end
 
-MainTab:AddSwitch("Start", function(enabled)
+FarmingTab:AddSwitch("Start", function(enabled)
     AutoFarm = enabled
     local player = game:GetService("Players").LocalPlayer
 
@@ -1623,7 +1644,7 @@ MainTab:AddSwitch("Start", function(enabled)
     end
 end)
 
-MainTab:AddLabel("Rocks:").TextSize = 22
+FarmingTab:AddLabel("Rocks:").TextSize = 22
 
 local function gettool()
     for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
@@ -1643,7 +1664,7 @@ local rockData = {
 
 local selectedRock = nil
 
-local rockDropdown = MainTab:AddDropdown("Select Rock", function(selection)
+local rockDropdown = FarmingTab:AddDropdown("Select Rock", function(selection)
     selectedRock = selection
 end)
 
@@ -1651,7 +1672,7 @@ for rockName in pairs(rockData) do
     rockDropdown:Add(rockName)
 end
 
-local autoRockSwitch = MainTab:AddSwitch("Auto Rock", function(enabled)
+local autoRockSwitch = FarmingTab:AddSwitch("Auto Rock", function(enabled)
     getgenv().RockFarmRunning = enabled
 
     if enabled and selectedRock then
@@ -1683,7 +1704,7 @@ local autoRockSwitch = MainTab:AddSwitch("Auto Rock", function(enabled)
     end
 end)
 
-MainTab:AddLabel("Machines:").TextSize = 22
+FarmingTab:AddLabel("Machines:").TextSize = 22
 
 local selectedLocation = nil
 local selectedWorkout = nil
@@ -1751,7 +1772,7 @@ local workoutLocations = {
     "Jungle Gym", "Muscle King Gym", "Legend Gym"
 }
 
-MainTab:AddSwitch("Start", function(enabled)
+FarmingTab:AddSwitch("Start", function(enabled)
     working = enabled
 
     if enabled then
@@ -1763,7 +1784,7 @@ MainTab:AddSwitch("Start", function(enabled)
     end
 end)
 
-local locationDropdown = MainTab:AddDropdown("Gym", function(location)
+local locationDropdown = FarmingTab:AddDropdown("Gym", function(location)
     selectedLocation = location
 
     if machineDropdown then
@@ -1771,7 +1792,7 @@ local locationDropdown = MainTab:AddDropdown("Gym", function(location)
     end
 
     if location == "Jungle Gym" then
-        machineDropdown = MainTab:AddDropdown("Machine", function(machine)
+        machineDropdown = FarmingTab:AddDropdown("Machine", function(machine)
             selectedWorkout = machine
         end)
         machineDropdown:Add("Bench Press")
@@ -1779,7 +1800,7 @@ local locationDropdown = MainTab:AddDropdown("Gym", function(location)
         machineDropdown:Add("Pull Up")
         machineDropdown:Add("Boulder")
     elseif location == "Muscle King Gym" then
-        machineDropdown = MainTab:AddDropdown("Machine", function(machine)
+        machineDropdown = FarmingTab:AddDropdown("Machine", function(machine)
             selectedWorkout = machine
         end)
         machineDropdown:Add("Bench Press")
@@ -1787,7 +1808,7 @@ local locationDropdown = MainTab:AddDropdown("Gym", function(location)
         machineDropdown:Add("Pull Up")
         machineDropdown:Add("Boulder")
     elseif location == "Legend Gym" then
-        machineDropdown = MainTab:AddDropdown("Machine", function(machine)
+        machineDropdown = FarmingTab:AddDropdown("Machine", function(machine)
             selectedWorkout = machine
         end)
         machineDropdown:Add("Bench Press")
@@ -1803,96 +1824,182 @@ end
 
 InventoryTab:AddLabel("Protein:").TextSize = 22
 
-local function activateProteinEgg()
-    local tool = player.Character:FindFirstChild("Protein Egg") or player.Backpack:FindFirstChild("Protein Egg")
-    if tool then
-        muscleEvent:FireServer("proteinEgg", tool)
+InventoryTab:AddLabel("Gifting Protein egg:").TextSize = 22
+
+local proteinEggLabel = InventoryTab:AddLabel("Protein Eggs: 0")
+proteinEggLabel.TextSize = 20
+
+local selectedEggPlayer = nil
+local eggCount = 0
+
+local eggDropdown = InventoryTab:AddDropdown("Player to Gift Eggs", function(selectedDisplayName)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.DisplayName == selectedDisplayName then
+            selectedEggPlayer = plr
+            break
+        end
+    end
+end)
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    if plr ~= Players.LocalPlayer then
+        eggDropdown:Add(plr.DisplayName)
     end
 end
 
-local running = false
+Players.PlayerAdded:Connect(function(plr)
+    if plr ~= Players.LocalPlayer then
+        eggDropdown:Add(plr.DisplayName)
+    end
+end)
+
+InventoryTab:AddTextBox("Amount of Eggs", function(text)
+    eggCount = tonumber(text) or 0
+end)
+
+InventoryTab:AddButton("Gift Eggs", function()
+    if selectedEggPlayer and eggCount > 0 then
+        for i = 1, eggCount do
+            local egg = Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
+            if egg then
+                ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedEggPlayer, egg)
+                task.wait(0.1)
+            end
+        end
+    end
+end)
+
+InventoryTab:AddLabel("Gifting Tropical Shakes:").TextSize = 22
+
+local tropicalShakeLabel = InventoryTab:AddLabel("Tropical Shakes: 0")
+tropicalShakeLabel.TextSize = 18
+
+local selectedShakePlayer = nil
+local shakeCount = 0
+
+local shakeDropdown = InventoryTab:AddDropdown("Player to Gift Tropical Shakes", function(selectedDisplayName)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.DisplayName == selectedDisplayName then
+            selectedShakePlayer = plr
+            break
+        end
+    end
+end)
+
+for _, plr in ipairs(Players:GetPlayers()) do
+    if plr ~= Players.LocalPlayer then
+        shakeDropdown:Add(plr.DisplayName)
+    end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+    if plr ~= Players.LocalPlayer then
+        shakeDropdown:Add(plr.DisplayName)
+    end
+end)
+
+InventoryTab:AddTextBox("Tropical Shakes gift", function(text)
+    shakeCount = tonumber(text) or 0
+end)
+
+InventoryTab:AddButton("Gift Tropical Shakes", function()
+    if selectedShakePlayer and shakeCount > 0 then
+        for i = 1, shakeCount do
+            local shake = Players.LocalPlayer.consumablesFolder:FindFirstChild("Tropical Shake")
+            if shake then
+                ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedShakePlayer, shake)
+                task.wait(0.1)
+            end
+        end
+    end
+end)
+
+local function updateItemCount()
+    local proteinEggCount = 0
+    local tropicalShakeCount = 0
+
+    local backpack = Players.LocalPlayer:WaitForChild("Backpack")
+    local consumablesFolder = Players.LocalPlayer:FindFirstChild("consumablesFolder")
+
+    if backpack then
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item.Name == "Protein Egg" then
+                proteinEggCount = proteinEggCount + 1
+            elseif item.Name == "Tropical Shake" or item.Name == "Piñas" then
+                tropicalShakeCount = tropicalShakeCount + 1
+            end
+        end
+    end
+    
+    if consumablesFolder then
+        for _, item in ipairs(consumablesFolder:GetChildren()) do
+            if item.Name == "Protein Egg" then
+                proteinEggCount = proteinEggCount + 1
+            elseif item.Name == "Tropical Shake" or item.Name == "Piñas" then
+                tropicalShakeCount = tropicalShakeCount + 1
+            end
+        end
+    end
+
+    proteinEggLabel.Text = "Protein Eggs: " .. proteinEggCount
+    tropicalShakeLabel.Text = "Tropical Shakes: " .. tropicalShakeCount
+end
 
 task.spawn(function()
     while true do
-        if running then
-            activateProteinEgg()
-            task.wait(0.25)
+        updateItemCount()
+        task.wait(0.25)
+    end
+end)
+
+
+local autoClearInventoryEnabled = false
+
+local boostsList = {
+    "ULTRA Shake",
+    "TOUGH Bar",
+    "Protein Shake",
+    "Energy Shake",
+    "Protein Bar",
+    "Energy Bar",
+    "Tropical Shake"
+}
+
+local function eatAllBoosts()
+    local player = game.Players.LocalPlayer
+    local backpack = player:WaitForChild("Backpack")
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    for _, boostName in ipairs(boostsList) do
+        local boost = backpack:FindFirstChild(boostName)
+        while boost do
+            boost.Parent = character
+            pcall(function()
+                boost:Activate()
+            end)
+            task.wait(0)
+            boost = backpack:FindFirstChild(boostName)
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        if autoClearInventoryEnabled then
+            eatAllBoosts()
+            task.wait(2)
         else
             task.wait(1)
         end
     end
 end)
 
-local switch = InventoryTab:AddSwitch("Delete All Egg", function(state)
-    running = state
-    if state then
-        activateProteinEgg()
-    end
-end)
-switch:Set(false)
-
-local itemList = {
-    "Tropical Shake",
-    "Energy Shake",
-    "Protein Bar",
-    "TOUGH Bar",
-    "Protein Shake",
-    "ULTRA Shake",
-    "Energy Bar"
-}
-
-local function formatEventName(itemName)
-    local parts = {}
-    for word in itemName:gmatch("%S+") do
-        table.insert(parts, word:lower())
-    end
-    for i = 2, #parts do
-        parts[i] = parts[i]:sub(1,1):upper() .. parts[i]:sub(2)
-    end
-    return table.concat(parts)
-end
-
-local function activateRandomItems(count)
-    local shuffledItems = {}
-    for _, item in ipairs(itemList) do
-        table.insert(shuffledItems, item)
-    end
-    for i = #shuffledItems, 2, -1 do
-        local j = math.random(i)
-        shuffledItems[i], shuffledItems[j] = shuffledItems[j], shuffledItems[i]
-    end
-    for i = 1, math.min(count, #shuffledItems) do
-        local tool = player.Character:FindFirstChild(shuffledItems[i]) or player.Backpack:FindFirstChild(shuffledItems[i])
-        if tool then
-            local eventName = formatEventName(shuffledItems[i]) 
-            muscleEvent:FireServer(eventName, tool)
-        end
-    end
-end
-
-local running = false
-
-task.spawn(function()
-    while true do
-        if running then
-            activateRandomItems(4)
-            task.wait(0.5)
-        else
-            task.wait(0.5)
-        end
-    end
+InventoryTab:AddSwitch("Auto Clear Inventory", function(state)
+    autoClearInventoryEnabled = state
 end)
 
-local eatswitch = InventoryTab:AddSwitch("Eat Everything", function(state)
-    running = state
-    if state then
-        activateRandomItems(4)
-    end
-end)
-eatswitch:Set(false)
 
-
-TeleportTab:AddLabel("Main:").TextSize = 22
+TeleportTab:AddLabel("TP:").TextSize = 22
 
 TeleportTab:AddButton("Tiny Island",function()
     local char = player.Character or Player.CharacterAdded()
