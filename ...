@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage") -- <--- BAGONG DAGDAG!
+local ReplicatedStorage = game:GetService("ReplicatedStorage") -- <--- Deklarado na sa simula
+local rEvents = ReplicatedStorage:FindFirstChild("rEvents") -- <--- SAFETY CHECK
 
 local localPlayer = Players.LocalPlayer
 local username = localPlayer.Name
@@ -24,18 +25,17 @@ local window = library:AddWindow(title, {
     can_resize = true,
 })
 
--- ANG BAHAGI NA ITO AY INAYOS NA
+-- INAYOS NA ANG LISTAHAN NG TABS, TINANGGAL ANG 'Gift'
 local MainTab = window:AddTab("Main")
 local FarmingTab = window:AddTab("Farming")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
 local SpecsTab = window:AddTab("Specs")
-local InventoryTab = window:AddTab("Inventory")
+local InventoryTab = window:AddTab("Inventory") -- Dito na ilalagay ang 'Gift' content
 local PetsTab = window:AddTab("Pet Shop")
 local TeleportTab = window:AddTab("Teleports")
 local StatsTab = window:AddTab("Stats")
 local infoTab = window:AddTab("Info")
-local Gift = window:AddTab("Gift")
 ------------------------------------------------------------------
 
 KillingTab:Show()
@@ -71,11 +71,12 @@ local function followPlayer(targetPlayer)
 end
 extraTab:AddSwitch("God Mode Brawl", function(State)
     godModeToggle = State
+    local brawlEvent = rEvents and rEvents:FindFirstChild("brawlEvent") -- Safety Check
 
-    if State then
+    if State and brawlEvent then
         task.spawn(function()
             while godModeToggle do
-                ReplicatedStorage.rEvents.brawlEvent:FireServer("joinBrawl")
+                brawlEvent:FireServer("joinBrawl")
                 task.wait(0)
             end
         end)
@@ -161,7 +162,9 @@ local godDamageActive = false
 
 extraTab:AddSwitch("Auto Ground Slam", function(state)
     godDamageActive = state
-    if state then
+    local muscleEvent = player:FindFirstChild("muscleEvent") -- Safety Check
+
+    if state and muscleEvent then
         task.spawn(function()
             while godDamageActive do
                 local player = LocalPlayer
@@ -174,7 +177,7 @@ extraTab:AddSwitch("Auto Ground Slam", function(state)
                     if groundSlam:FindFirstChild("attackTime") then
                         groundSlam.attackTime.Value = 0
                     end
-                    player.muscleEvent:FireServer("slam")
+                    muscleEvent:FireServer("slam")
                     groundSlam:Activate()
                 end
 
@@ -202,7 +205,8 @@ KillingTab:Show()
 
 MainTab:AddLabel("Normal Farm:").TextSize = 22
 
-local changeSpeedSizeRemote = ReplicatedStorage.rEvents.changeSpeedSizeRemote
+-- DITO ANG SAFETY CHECK NA INAYOS KO PARA HINDI MAG-CRASH ANG SCRIPT (HINDI NA 'nil' ang changeSpeedSizeRemote)
+local changeSpeedSizeRemote = rEvents and rEvents:FindFirstChild("changeSpeedSizeRemote")
 
 local userSize = 2
 local sizeActive = false
@@ -223,7 +227,7 @@ setsizeswitch:Set(false)
 
 task.spawn(function()
 	while true do
-		if sizeActive then
+		if sizeActive and changeSpeedSizeRemote then -- <-- May safety check na
 			local character = Players.LocalPlayer.Character
 			if character then
 				local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -255,7 +259,7 @@ setspeedswitch:Set(false)
 
 task.spawn(function()
 	while true do
-		if speedActive then
+		if speedActive and changeSpeedSizeRemote then -- <-- May safety check na
 			local character = Players.LocalPlayer.Character
 			if character then
 				local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -327,11 +331,12 @@ walkonwaterSwicth:Set(true)
 
 local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
     _G.AutoSpinWheel = bool
+    local openFortuneWheelRemote = rEvents and rEvents:FindFirstChild("openFortuneWheelRemote") -- Safety Check
     
-    if bool then
+    if bool and openFortuneWheelRemote and ReplicatedStorage:FindFirstChild("fortuneWheelChances") then
         spawn(function()
             while _G.AutoSpinWheel and wait(1) do
-                ReplicatedStorage.rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", ReplicatedStorage.fortuneWheelChances["Fortune Wheel"])
+                openFortuneWheelRemote:InvokeServer("openFortuneWheel", ReplicatedStorage.fortuneWheelChances["Fortune Wheel"])
             end
         end)
     end
@@ -388,11 +393,13 @@ end
 
 local function fastPunch(player)
     local punch = player.Backpack:FindFirstChild("Punch") or player.Character:FindFirstChild("Punch")
-    if punch then
+    local muscleEvent = player:FindFirstChild("muscleEvent") -- Safety Check
+
+    if punch and muscleEvent then
         punch.Parent = player.Character
         if punch:FindFirstChild("attackTime") then punch.attackTime.Value = 0 end
-        player.muscleEvent:FireServer("punch", "rightHand")
-        player.muscleEvent:FireServer("punch", "leftHand")
+        muscleEvent:FireServer("punch", "rightHand")
+        muscleEvent:FireServer("punch", "leftHand")
         local punchTool = player.Character and player.Character:FindFirstChild("Punch")
         if punchTool then punchTool:Activate() end
     end
@@ -401,6 +408,7 @@ end
 MainTab:AddSwitch("Start", function(enabled)
     AutoFarm = enabled
     local player = game:GetService("Players").LocalPlayer
+    local muscleEvent = player:FindFirstChild("muscleEvent") -- Safety Check
 
     local function unequipAll()
         local toolsToUnequip = {}
@@ -424,21 +432,21 @@ MainTab:AddSwitch("Start", function(enabled)
         end
     end
 
-    if enabled then
+    if enabled and muscleEvent then
         task.spawn(function()
             while AutoFarm do
                 
                 if SelectedMode == "Weight" or SelectedMode == "Pushups" or SelectedMode == "Situps" or SelectedMode == "Handstands" then
                     
                     equipToolFast(player, SelectedMode, "repTime", 0)
-                    player.muscleEvent:FireServer("rep")
+                    muscleEvent:FireServer("rep")
 
                 elseif SelectedMode == "Fast Punch" then
                     fastPunch(player)
 
                 elseif SelectedMode == "Stomp" then
                     equipToolFast(player, "Stomp", "attackTime", 0)
-                    player.muscleEvent:FireServer("stomp")
+                    muscleEvent:FireServer("stomp")
                     if player.Character:FindFirstChild("Stomp") then player.Character.Stomp:Activate() end
                     if tick() % 6 < 0.1 then
                         local virtualUser = game:GetService("VirtualUser")
@@ -448,7 +456,7 @@ MainTab:AddSwitch("Start", function(enabled)
 
                 elseif SelectedMode == "Ground Slam" then
                     equipToolFast(player, "Ground Slam", "attackTime", 0)
-                    player.muscleEvent:FireServer("slam")
+                    muscleEvent:FireServer("slam")
                     if player.Character:FindFirstChild("Ground Slam") then player.Character["Ground Slam"]:Activate() end
                     if tick() % 6 < 0.1 then
                         local virtualUser = game:GetService("VirtualUser")
@@ -458,17 +466,17 @@ MainTab:AddSwitch("Start", function(enabled)
                 
                 elseif SelectedMode == "Weight + Punch" then
                     equipToolFast(player, "Weight", "repTime", 0)
-                    player.muscleEvent:FireServer("rep")
+                    muscleEvent:FireServer("rep")
                     fastPunch(player)
 
                 elseif SelectedMode == "Pushups + Punch" then
                     equipToolFast(player, "Pushups", "repTime", 0)
-                    player.muscleEvent:FireServer("rep")
+                    muscleEvent:FireServer("rep")
                     fastPunch(player)
                 
                 elseif SelectedMode == "Situps + Punch" then
                     equipToolFast(player, "Situps", "repTime", 0)
-                    player.muscleEvent:FireServer("rep")
+                    muscleEvent:FireServer("rep")
                     fastPunch(player)
                 
                 end
@@ -489,8 +497,11 @@ local function gettool()
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
         end
     end
-    player.muscleEvent:FireServer("punch", "leftHand")
-    player.muscleEvent:FireServer("punch", "rightHand")
+    local muscleEvent = player:FindFirstChild("muscleEvent") -- Safety Check
+    if muscleEvent then
+        muscleEvent:FireServer("punch", "leftHand")
+        muscleEvent:FireServer("punch", "rightHand")
+    end
 end
 
 local rockData = {
@@ -558,8 +569,9 @@ local function pressE()
 end
 
 local function autoLift()
-    while working and task.wait() do
-        game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+    local muscleEvent = game:GetService("Players").LocalPlayer:FindFirstChild("muscleEvent") -- Safety Check
+    while working and muscleEvent and task.wait() do
+        muscleEvent:FireServer("rep")
     end
 end
 
@@ -709,15 +721,17 @@ local rebirthSwitch
 
 local function autoRebirth()
     isAutoRebirthing = true
-    while isAutoRebirthing and rebirths.Value < targetRebirths do
-        ReplicatedStorage.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+    local rebirthRemote = rEvents and rEvents:FindFirstChild("rebirthRemote") -- Safety Check
+
+    while isAutoRebirthing and rebirths.Value < targetRebirths and rebirthRemote do
+        rebirthRemote:InvokeServer("rebirthRequest")
         task.wait(0.05)
     end
     isAutoRebirthing = false
     if rebirthSwitch then
         rebirthSwitch:Set(false)
     end
-end)
+end
 
 FarmingTab:AddTextBox("Set Rebirth Target", function(text)
     local val = tonumber(text)
@@ -758,8 +772,9 @@ end)
 oneswitch:Set(false)
 
 task.spawn(function()
+	local changeSpeedSizeRemote = rEvents and rEvents:FindFirstChild("changeSpeedSizeRemote") -- Safety Check
     while true do
-        if sizeActive then
+        if sizeActive and changeSpeedSizeRemote then
             local character = Players.LocalPlayer.Character
             if character then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -1086,8 +1101,11 @@ local function gettool()
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
         end
     end
-    player.muscleEvent:FireServer("punch", "leftHand")
-    player.muscleEvent:FireServer("punch", "rightHand")
+    local muscleEvent = player:FindFirstChild("muscleEvent") -- Safety Check
+    if muscleEvent then
+        muscleEvent:FireServer("punch", "leftHand")
+        muscleEvent:FireServer("punch", "rightHand")
+    end
 end
 
 local function isPlayerAlive(target)
@@ -1102,7 +1120,7 @@ local function getPlayerDisplayText(player)
     else
         return name
     end
-end
+}
 
 local _G = _G or {}
 _G.whitelistedPlayers = {}
@@ -1141,10 +1159,14 @@ end
 KillingTab:AddLabel("KIll:").TextSize = 22
 local dropdown = KillingTab:AddDropdown("Select Pet", function(text)
     local petsFolder = game.Players.LocalPlayer.petsFolder
+    local equipPetEvent = rEvents and rEvents:FindFirstChild("equipPetEvent") -- Safety Check
+
+    if not equipPetEvent then return end
+
     for _, folder in pairs(petsFolder:GetChildren()) do
         if folder:IsA("Folder") then
             for _, pet in pairs(folder:GetChildren()) do
-                ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+                equipPetEvent:FireServer("unequipPet", pet)
             end
         end
     end
@@ -1157,7 +1179,7 @@ local dropdown = KillingTab:AddDropdown("Select Pet", function(text)
         end
     end
     for i = 1, math.min(8, #petsToEquip) do
-        ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", petsToEquip[i])
+        equipPetEvent:FireServer("equipPet", petsToEquip[i])
         task.wait(0.1)
     end
 end)
@@ -1296,7 +1318,8 @@ local function ensureEggEquipped()
 end
 local comboSwitch = KillingTab:AddSwitch("NaN", function(bool)
     comboActive = bool
-    if bool then
+    local changeSpeedSizeRemote = rEvents and rEvents:FindFirstChild("changeSpeedSizeRemote") -- Safety Check
+    if bool and changeSpeedSizeRemote then
         changeSpeedSizeRemote:InvokeServer("changeSize", 0/0)
         eggLoop = task.spawn(function()
             while comboActive do
@@ -1587,16 +1610,20 @@ inventoryTabLabelEggs.TextSize = 20
 local inventoryTabLabelShakes = InventoryTab:AddLabel("Tropical Shakes: 0")
 inventoryTabLabelShakes.TextSize = 18
 
-Gift:AddSwitch("Auto Gift Protein Eggs", function(state)
+-- Dito na nagsisimula ang nilalaman ng "Gift" tab, na inilipat sa "Inventory"
+
+InventoryTab:AddLabel("— Gift System —").TextSize = 24
+InventoryTab:AddLabel("Gifting Protein egg:").TextSize = 22
+local giftRemote = rEvents and rEvents:FindFirstChild("giftRemote") -- Safety Check
+
+InventoryTab:AddSwitch("Auto Gift Protein Eggs", function(state)
     autoGiftEggsEnabled = state
 end)
-
-Gift:AddLabel("Gifting Protein egg:").TextSize = 22
 
 local selectedEggPlayer = nil
 local eggCount = 0
 
-local eggDropdown = Gift:AddDropdown("Player to Gift Eggs", function(selectedDisplayName)
+local eggDropdown = InventoryTab:AddDropdown("Player to Gift Eggs", function(selectedDisplayName)
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr.DisplayName == selectedDisplayName then
             selectedEggPlayer = plr
@@ -1617,28 +1644,28 @@ Players.PlayerAdded:Connect(function(plr)
     end
 end)
 
-Gift:AddTextBox("Amount of Eggs", function(text)
+InventoryTab:AddTextBox("Amount of Eggs", function(text)
     eggCount = tonumber(text) or 0
 end)
 
-Gift:AddButton("Gift Eggs", function()
-    if selectedEggPlayer and eggCount > 0 then
+InventoryTab:AddButton("Gift Eggs", function()
+    if selectedEggPlayer and eggCount > 0 and giftRemote then
         for i = 1, eggCount do
             local egg = Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
             if egg then
-                ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedEggPlayer, egg)
+                giftRemote:InvokeServer("giftRequest", selectedEggPlayer, egg)
                 task.wait(0.1)
             end
         end
     end
 end)
 
-Gift:AddLabel("Gifting Tropical Shakes:").TextSize = 22
+InventoryTab:AddLabel("Gifting Tropical Shakes:").TextSize = 22
 
 local selectedShakePlayer = nil
 local shakeCount = 0
 
-local shakeDropdown = Gift:AddDropdown("Player to Gift Tropical Shakes", function(selectedDisplayName)
+local shakeDropdown = InventoryTab:AddDropdown("Player to Gift Tropical Shakes", function(selectedDisplayName)
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr.DisplayName == selectedDisplayName then
             selectedShakePlayer = plr
@@ -1659,21 +1686,22 @@ Players.PlayerAdded:Connect(function(plr)
     end
 end)
 
-Gift:AddTextBox("Tropical Shakes gift", function(text)
+InventoryTab:AddTextBox("Tropical Shakes gift", function(text)
     shakeCount = tonumber(text) or 0
 end)
 
-Gift:AddButton("Gift Tropical Shakes", function()
-    if selectedShakePlayer and shakeCount > 0 then
+InventoryTab:AddButton("Gift Tropical Shakes", function()
+    if selectedShakePlayer and shakeCount > 0 and giftRemote then
         for i = 1, shakeCount do
             local shake = Players.LocalPlayer.consumablesFolder:FindFirstChild("Tropical Shake")
             if shake then
-                ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedShakePlayer, shake)
+                giftRemote:InvokeServer("giftRequest", selectedShakePlayer, shake)
                 task.wait(0.1)
             end
         end
     end
 end)
+-- Dito na nagtatapos ang nilalaman ng "Gift" tab.
 
 local function updateItemCount()
     local proteinEggCount = 0
@@ -1702,24 +1730,26 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while true do
-        if autoGiftEggsEnabled and selectedEggPlayer and inventoryTabLabelEggs.Text:match("Protein Eggs: (%d+)") then
-            local _, countStr = inventoryTabLabelEggs.Text:match("Protein Eggs: (%d+)")
-            local availableEggs = tonumber(countStr) or 0
+    if giftRemote then -- Safety Check
+        while true do
+            if autoGiftEggsEnabled and selectedEggPlayer and inventoryTabLabelEggs.Text:match("Protein Eggs: (%d+)") then
+                local _, countStr = inventoryTabLabelEggs.Text:match("Protein Eggs: (%d+)")
+                local availableEggs = tonumber(countStr) or 0
 
-            if availableEggs > 0 then
-                local egg = Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
-                if egg then
-                    ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedEggPlayer, egg)
-                    task.wait(0.25)
+                if availableEggs > 0 then
+                    local egg = Players.LocalPlayer.consumablesFolder:FindFirstChild("Protein Egg")
+                    if egg then
+                        giftRemote:InvokeServer("giftRequest", selectedEggPlayer, egg)
+                        task.wait(0.25)
+                    else
+                        task.wait(1)
+                    end
                 else
                     task.wait(1)
                 end
             else
                 task.wait(1)
             end
-        else
-            task.wait(1)
         end
     end
 end)
@@ -1849,12 +1879,14 @@ petDropdown:Add("White Pheonix")
 petDropdown:Add("Yellow Butterfly")
 PetsTab:AddSwitch("Buy Pet", function(bool)
     _G.AutoHatchPet = bool
-    if bool then
+    local cPetShopRemote = ReplicatedStorage:FindFirstChild("cPetShopRemote") -- Safety Check
+
+    if bool and selectedPet ~= "" and cPetShopRemote then
         spawn(function()
             while _G.AutoHatchPet and selectedPet ~= "" do
                 local petToOpen = ReplicatedStorage.cPetShopFolder:FindFirstChild(selectedPet)
                 if petToOpen then
-                    ReplicatedStorage.cPetShopRemote:InvokeServer(petToOpen)
+                    cPetShopRemote:InvokeServer(petToOpen)
                 end
                 task.wait(0.1)
             end
@@ -1879,12 +1911,14 @@ auraDropdown:Add("Toxic")
 auraDropdown:Add("Ultimate")
 PetsTab:AddSwitch("Buy Aura", function(bool)
     _G.AutoHatchAura = bool
-    if bool then
+    local cAuraShopRemote = ReplicatedStorage:FindFirstChild("cAuraShopRemote") -- Safety Check
+
+    if bool and selectedAura ~= "" and cAuraShopRemote then
         spawn(function()
             while _G.AutoHatchAura and selectedAura ~= "" do
                 local auraToOpen = ReplicatedStorage.cAuraShopFolder:FindFirstChild(selectedAura)
                 if auraToOpen then
-                    ReplicatedStorage.cAuraShopRemote:InvokeServer(auraToOpen)
+                    cAuraShopRemote:InvokeServer(auraToOpen)
                 end
                 task.wait(0.1)
             end
