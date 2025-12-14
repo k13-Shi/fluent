@@ -81,6 +81,7 @@ ReplicatedStorage.ChildAdded:Connect(function(child)
 end)
 
 local MainTab = window:AddTab("Main")
+local FarmingTab = window:AddTab("Farming")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
 
@@ -235,10 +236,9 @@ extraTab:AddButton("Empty", function()
     })
 end)
 local SpecsTab = window:AddTab("Specs")
-local FarmingTab = window:AddTab("Farming")
-local InventoryTab = window:AddTab("Inventory")
-local PetsTab = window:AddTab("Pet Shop")
 local TeleportTab = window:AddTab("Teleports")
+local PetsTab = window:AddTab("Pet Shop")
+local InventoryTab = window:AddTab("Inventory")
 local StatsTab = window:AddTab("Stats")
 local infoTab = window:AddTab("Info")
 KillingTab:Show()
@@ -1751,7 +1751,7 @@ local workoutLocations = {
     "Jungle Gym", "Muscle King Gym", "Legend Gym"
 }
 
-FarmingTab:AddSwitch("Start", function(enabled)
+MainTab:AddSwitch("Start", function(enabled)
     working = enabled
 
     if enabled then
