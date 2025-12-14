@@ -1822,7 +1822,6 @@ for _, location in ipairs(workoutLocations) do
     locationDropdown:Add(location)
 end
 
-InventoryTab:AddLabel("Protein:").TextSize = 22
 
 InventoryTab:AddLabel("Gifting Protein egg:").TextSize = 22
 
