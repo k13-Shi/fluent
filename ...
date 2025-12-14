@@ -24,7 +24,7 @@ local window = library:AddWindow(title, {
 })
 
 local MainTab = window:AddTab("Main")
-local FarmingTab = wMindow:AddTab("Farming")
+local FarmingTab = Mindow:AddTab("Farming")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
 
