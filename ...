@@ -15,7 +15,7 @@ end
 
 local title = ("Shi Private Version | Welcome %s"):format(displayName)
 
-local library = local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lkjhg969/ffdsf/refs/heads/main/hgfhj", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lkjhg969/ffdsf/refs/heads/main/hgfhj", true))()
 
 local window = library:AddWindow(title, {
     main_color = Color3.fromRGB(80, 0, 130),
