@@ -23,10 +23,29 @@ local window = library:AddWindow(title, {
     can_resize = true,
 })
 
+-- ANG BAHAGI NA ITO ANG INAYOS: LAHAT AY GUMAGAMIT NA NG 'window'
 local MainTab = window:AddTab("Main")
 local FarmingTab = window:AddTab("Farming")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
+local SpecsTab = window:AddTab("Specs")
+local InventoryTab = window:AddTab("Inventory")
+local PetsTab = window:AddTab("Pet Shop")
+local TeleportTab = window:AddTab("Teleports")
+local StatsTab = window:AddTab("Stats")
+local infoTab = window:AddTab("Info")
+local Gift = window:AddTab("Gift")
+------------------------------------------------------------------
+
+KillingTab:Show()
+
+infoTab:AddLabel("Made by Shi ♥️").TextSize = 20
+infoTab:AddLabel("Facebook | Sai Espinoza")
+infoTab:AddLabel("Tiktok | k13s_1")
+infoTab:AddLabel("Roblox | DarkPhantoM_Prince")
+local wLabel = infoTab:AddLabel("VERSION//2.0.0")
+wLabel.TextSize = 30
+wLabel.Font = Enum.Font.Arcade
 
 extraTab:AddLabel("God Mode System").TextSize = 24
 
@@ -176,23 +195,9 @@ extraTab:AddButton("Empty", function()
         Duration = 3
     })
 end)
-local SpecsTab = window:AddTab("Specs")
-local InventoryTab = window:AddTab("Inventory")
-local PetsTab = window:AddTab("Pet Shop")
-local TeleportTab = window:AddTab("Teleports")
-local StatsTab = window:AddTab("Stats")
-local infoTab = window:AddTab("Info")
-local Gift = window:AddTab("Gift")
+
 
 KillingTab:Show()
-
-infoTab:AddLabel("Made by Shi ♥️").TextSize = 20
-infoTab:AddLabel("Facebook | Sai Espinoza")
-infoTab:AddLabel("Tiktok | k13s_1")
-infoTab:AddLabel("Roblox | DarkPhantoM_Prince")
-local wLabel = infoTab:AddLabel("VERSION//2.0.0")
-wLabel.TextSize = 30
-wLabel.Font = Enum.Font.Arcade
 
 MainTab:AddLabel("Normal Farm:").TextSize = 22
 
