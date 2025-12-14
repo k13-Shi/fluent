@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage") -- <--- BAGONG DAGDAG!
 
 local localPlayer = Players.LocalPlayer
 local username = localPlayer.Name
@@ -23,7 +24,7 @@ local window = library:AddWindow(title, {
     can_resize = true,
 })
 
--- ANG BAHAGI NA ITO ANG INAYOS: LAHAT AY GUMAGAMIT NA NG 'window'
+-- ANG BAHAGI NA ITO AY INAYOS NA
 local MainTab = window:AddTab("Main")
 local FarmingTab = window:AddTab("Farming")
 local KillingTab = window:AddTab("Killing")
@@ -74,7 +75,7 @@ extraTab:AddSwitch("God Mode Brawl", function(State)
     if State then
         task.spawn(function()
             while godModeToggle do
-                game:GetService("ReplicatedStorage").rEvents.brawlEvent:FireServer("joinBrawl")
+                ReplicatedStorage.rEvents.brawlEvent:FireServer("joinBrawl")
                 task.wait(0)
             end
         end)
@@ -330,7 +331,7 @@ local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
     if bool then
         spawn(function()
             while _G.AutoSpinWheel and wait(1) do
-                game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
+                ReplicatedStorage.rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", ReplicatedStorage.fortuneWheelChances["Fortune Wheel"])
             end
         end)
     end
@@ -716,7 +717,7 @@ local function autoRebirth()
     if rebirthSwitch then
         rebirthSwitch:Set(false)
     end
-end
+end)
 
 FarmingTab:AddTextBox("Set Rebirth Target", function(text)
     local val = tonumber(text)
@@ -1114,7 +1115,7 @@ local function isWhitelisted(player)
         end
     end
     return false
-end
+}
 
 local function isBlacklisted(player)
     for _, name in ipairs(_G.blacklistedPlayers) do
@@ -1143,20 +1144,20 @@ local dropdown = KillingTab:AddDropdown("Select Pet", function(text)
     for _, folder in pairs(petsFolder:GetChildren()) do
         if folder:IsA("Folder") then
             for _, pet in pairs(folder:GetChildren()) do
-                game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("unequipPet", pet)
+                ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
             end
         end
     end
     task.wait(0.2)
     local petName = text
     local petsToEquip = {}
-    for _, pet in pairs(game.Players.LocalPlayer.petsFolder.Unique:GetChildren()) do
+    for _, pet in pairs(ReplicatedStorage.cPetShopFolder.Unique:GetChildren()) do
         if pet.Name == petName then
             table.insert(petsToEquip, pet)
         end
     end
     for i = 1, math.min(8, #petsToEquip) do
-        game:GetService("ReplicatedStorage").rEvents.equipPetEvent:FireServer("equipPet", petsToEquip[i])
+        ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", petsToEquip[i])
         task.wait(0.1)
     end
 end)
