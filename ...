@@ -69,7 +69,6 @@ end)
 
 local MainTab = window:AddTab("Main")
 local FarmingTab = window:AddTab("Farming")
-local FastfarmTab = window:AddTab("Fast Farm")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
 
@@ -227,7 +226,7 @@ local SpecsTab = window:AddTab("Specs")
 local PetsTab = window:AddTab("Pet Shop")
 local TeleportTab = window:AddTab("Teleports")
 local StatsTab = window:AddTab("Stats")
-local InventoryTab = window:AddTab("Gift")
+local InventoryTab = window:AddTab("Inventory")
 local infoTab = window:AddTab("Info")
 KillingTab:Show()
 
