@@ -27,7 +27,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Coron
 
 local window = library:AddWindow(title, {
     main_color = Color3.fromRGB(80, 0, 130),
-    min_size = Vector2.new(820, 630),
+    min_size = Vector2.new(600, 830),
     can_resize = true,
 })
 
