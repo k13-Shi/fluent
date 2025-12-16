@@ -69,6 +69,7 @@ end)
 
 local MainTab = window:AddTab("Main")
 local FarmingTab = window:AddTab("Farming")
+local FastfarmTab = window:AddTab("Fast Farm")
 local KillingTab = window:AddTab("Killing")
 local extraTab = window:AddTab("Extra")
 
