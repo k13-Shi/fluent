@@ -397,17 +397,6 @@ local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
 end)
 antiKnockbackSwitch:Set(true)
 
-local MainTab:AddButton("Jungle Lift",function()
-    local player = game.Players.LocalPlayer
-    local char = player.Character or Player.CharacterAdded:wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = CFrame.new(-8642.396484375, 6.7980651855, 2086.1030273)
-    task.wait(0.2)
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    task.wait(0.05)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-end)
-
 local MainTab:AddSwitch("Fast Rebirth", function(state)
     isRunning = state
     
@@ -438,91 +427,6 @@ end)
 local running = false
 local thread = nil
 
-local sizeSwitch = MainTab:AddSwitch("Set Size 1", function(bool)
-    running = bool
-    if running then
-        thread = coroutine.create(function()
-            while running do
-                game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
-                wait(0.01)
-            end
-        end)
-        coroutine.resume(thread)
-    end
-end)
-
-local MainTab:AddButton("Anti Lag", function()
-    local player = game.Players.LocalPlayer
-    local playerGui = player:WaitForChild("PlayerGui")
-    local lighting = game:GetService("Lighting")
-
-    for _, gui in pairs(playerGui:GetChildren()) do
-        if gui:IsA("ScreenGui") then
-            gui:Destroy()
-        end
-    end
-
-    local function darkenSky()
-        for _, v in pairs(lighting:GetChildren()) do
-            if v:IsA("Sky") then
-                v:Destroy()
-            end
-        end
-
-        local darkSky = Instance.new("Sky")
-        darkSky.Name = "DarkSky"
-        darkSky.SkyboxBk = "rbxassetid://0"
-        darkSky.SkyboxDn = "rbxassetid://0"
-        darkSky.SkyboxFt = "rbxassetid://0"
-        darkSky.SkyboxLf = "rbxassetid://0"
-        darkSky.SkyboxRt = "rbxassetid://0"
-        darkSky.SkyboxUp = "rbxassetid://0"
-        darkSky.Parent = lighting
-
-        lighting.Brightness = 0
-        lighting.ClockTime = 0
-        lighting.TimeOfDay = "00:00:00"
-        lighting.OutdoorAmbient = Color3.new(0, 0, 0)
-        lighting.Ambient = Color3.new(0, 0, 0)
-        lighting.FogColor = Color3.new(0, 0, 0)
-        lighting.FogEnd = 100
-
-        task.spawn(function()
-            while true do
-                wait(5)
-                if not lighting:FindFirstChild("DarkSky") then
-                    darkSky:Clone().Parent = lighting
-                end
-                lighting.Brightness = 0
-                lighting.ClockTime = 0
-                lighting.OutdoorAmbient = Color3.new(0, 0, 0)
-                lighting.Ambient = Color3.new(0, 0, 0)
-                lighting.FogColor = Color3.new(0, 0, 0)
-                lighting.FogEnd = 100
-            end
-        end)
-    end
-
-    local function removeParticleEffects()
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("ParticleEmitter") then
-                obj:Destroy()
-            end
-        end
-    end
-
-    local function removeLightSources()
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
-                obj:Destroy()
-            end
-        end
-    end
-
-    removeParticleEffects()
-    removeLightSources()
-    darkenSky()
-end)
 
 local lockRunning = false
 local lockThread = nil
