@@ -250,760 +250,214 @@ local Player = LocalPlayer
 local MainTab = window:AddTab("Main")
 MainTab:AddLabel("Settings:").TextSize = 22
 
-
-
 local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
-
     _G.AutoSpinWheel = bool
-
     
-
     if bool then
-
         spawn(function()
-
             while _G.AutoSpinWheel and wait(1) do
-
                 game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
-
             end
-
         end)
-
     end
-
 end)
-
-
 
 local changeSpeedSizeRemote = ReplicatedStorage.rEvents.changeSpeedSizeRemote
 
-
-
 local userSize = 2
-
 local sizeActive = false
 
-
-
 MainTab:AddTextBox("Size", function(text)
-
-text = string.gsub(text, "%s+", "")
-
-local value = tonumber(text)
-
-if value and value > 0 then
-
-userSize = value
-
-end
-
+	text = string.gsub(text, "%s+", "")
+	local value = tonumber(text)
+	if value and value > 0 then
+		userSize = value
+	end
 end)
-
-
 
 local setsizeswitch = MainTab:AddSwitch("Set Size", function(bool)
-
-sizeActive = bool
-
+	sizeActive = bool
 end)
-
-
 
 setsizeswitch:Set(false)
 
-
-
 task.spawn(function()
-
-while true do
-
-if sizeActive then
-
-local character = Players.LocalPlayer.Character
-
-if character then
-
-local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-if humanoid then
-
-changeSpeedSizeRemote:InvokeServer("changeSize", userSize)
-
-end
-
-end
-
-end
-
-task.wait(0.15)
-
-end
-
+	while true do
+		if sizeActive then
+			local character = Players.LocalPlayer.Character
+			if character then
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					changeSpeedSizeRemote:InvokeServer("changeSize", userSize)
+				end
+			end
+		end
+		task.wait(0.15)
+	end
 end)
-
-
 
 local userSpeed = 120
-
 local speedActive = false
 
-
-
 MainTab:AddTextBox("Speed", function(text)
-
-text = string.gsub(text, "%s+", "")
-
-local value = tonumber(text)
-
-if value and value > 0 then
-
-userSpeed = value
-
-end
-
+	text = string.gsub(text, "%s+", "")
+	local value = tonumber(text)
+	if value and value > 0 then
+		userSpeed = value
+	end
 end)
-
-
 
 local setspeedswitch = MainTab:AddSwitch("Set Speed", function(bool)
-
-speedActive = bool
-
+	speedActive = bool
 end)
-
-
 
 setspeedswitch:Set(false)
 
-
-
 task.spawn(function()
-
-while true do
-
-if speedActive then
-
-local character = Players.LocalPlayer.Character
-
-if character then
-
-local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-if humanoid then
-
-changeSpeedSizeRemote:InvokeServer("changeSpeed", userSpeed)
-
-end
-
-end
-
-end
-
-task.wait(0.15)
-
-end
-
+	while true do
+		if speedActive then
+			local character = Players.LocalPlayer.Character
+			if character then
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					changeSpeedSizeRemote:InvokeServer("changeSpeed", userSpeed)
+				end
+			end
+		end
+		task.wait(0.15)
+	end
 end)
-
-
 
 MainTab:AddSwitch("Infinite Jump", function(bool)
-
     _G.InfiniteJump = bool
-
     
-
     if bool then
-
         local InfiniteJumpConnection
-
         InfiniteJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-
             if _G.InfiniteJump then
-
                 game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-
             else
-
                 InfiniteJumpConnection:Disconnect()
-
             end
-
         end)
-
     end
-
 end)
-
-
-
 
 
 local parts = {}
-
 local partSize = 2048
-
 local totalDistance = 50000
-
 local startPosition = Vector3.new(-2, -9.5, -2)
 
-
-
 local function createAllParts()
-
     local numberOfParts = math.ceil(totalDistance / partSize)
-
     
-
     for x = 0, numberOfParts - 1 do
-
         for z = 0, numberOfParts - 1 do
-
             local function createPart(pos, name)
-
                 local part = Instance.new("Part")
-
                 part.Size = Vector3.new(partSize, 1, partSize)
-
                 part.Position = pos
-
                 part.Anchored = true
-
                 part.Transparency = 1
-
                 part.CanCollide = true
-
                 part.Name = name
-
                 part.Parent = workspace
-
                 return part
-
             end
-
             
-
             table.insert(parts, createPart(startPosition + Vector3.new(x*partSize,0,z*partSize), "Part_Side_"..x.."_"..z))
-
             table.insert(parts, createPart(startPosition + Vector3.new(-x*partSize,0,z*partSize), "Part_LeftRight_"..x.."_"..z))
-
             table.insert(parts, createPart(startPosition + Vector3.new(-x*partSize,0,-z*partSize), "Part_UpLeft_"..x.."_"..z))
-
             table.insert(parts, createPart(startPosition + Vector3.new(x*partSize,0,-z*partSize), "Part_UpRight_"..x.."_"..z))
-
         end
-
     end
-
 end
-
 task.spawn(createAllParts)
-
-
 
 MainTab:AddLabel("Important:").TextSize = 22
 
-
-
 local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
-
     if bool then
-
         local playerName = game.Players.LocalPlayer.Name
-
         local character = game.Workspace:FindFirstChild(playerName)
-
         if character then
-
             local rootPart = character:FindFirstChild("HumanoidRootPart")
-
             if rootPart then
-
                 local bodyVelocity = Instance.new("BodyVelocity")
-
                 bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
-
                 bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-
                 bodyVelocity.P = 1250
-
                 bodyVelocity.Parent = rootPart
-
             end
-
         end
-
     else
-
         local playerName = game.Players.LocalPlayer.Name
-
         local character = game.Workspace:FindFirstChild(playerName)
-
         if character then
-
             local rootPart = character:FindFirstChild("HumanoidRootPart")
-
             if rootPart then
-
                 local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
-
                 if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
-
                     existingVelocity:Destroy()
-
                 end
-
             end
-
         end
-
     end
-
 end)
-
 antiKnockbackSwitch:Set(true)
 
-
-
-local player = game.Players.LocalPlayer
-
-local muscleEvent = game:GetService("ReplicatedStorage").rEvents.muscleRemote
-
-
-
-local isFastStrengthRunning = false
-
-
-
-local fastStrengthSwitch = MainTab:AddSwitch("Fast Strength", function(state)
-
-    isFastStrengthRunning = state
-
-end)
-
-fastStrengthSwitch:Set(false)
-
-
-
-task.spawn(function()
-
-    while task.wait() do 
-
-        if isFastStrengthRunning then
-
-            muscleEvent:FireServer("lift", player.Character:FindFirstChildOfClass("Tool") or player.Backpack:FindFirstChildOfClass("Tool"))
-
-            task.wait(0.01) 
-
-        end
-
-    end
-
-end)
-
-
-
-local function unequipPets()
-
-    for _, folder in pairs(Player.petsFolder:GetChildren()) do
-
-        if folder:IsA("Folder") then
-
-            for _, pet in pairs(folder:GetChildren()) do
-
-                ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
-
-            end
-
-        end
-
-    end
-
-    task.wait(0.1)
-
-end
-
-
-
-local function equipPetsByName(name)
-
-    unequipPets()
-
-    task.wait(0.01)
-
-    for _, pet in pairs(Player.petsFolder.Unique:GetChildren()) do
-
-        if pet.Name == name then
-
-            ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
-
-        end
-
-    end
-
-end
-
-
-
-local function activateProteinEgg()
-
-    local tool = Player.Character:FindFirstChild("Protein Egg") or Player.Backpack:FindFirstChild("Protein Egg")
-
-    if tool then
-
-        muscleEvent:FireServer("proteinEgg", tool)
-
-    end
-
-end
-
-
-
-local running = false
-
-
-
-task.spawn(function()
-
-    while true do
-
-        if running then
-
-            activateProteinEgg()
-
-            task.wait(1800)
-
-        else
-
-            task.wait(1)
-
-        end
-
-    end
-
-end)
-
-
-
-local switch = MainTab:AddSwitch("Auto Egg", function(state)
-
-    running = state
-
-    if state then
-
-        activateProteinEgg()
-
-    end
-
-end)
-
-switch:Set(false)
-
-
-
-MainTab:AddButton("Jungle Squat",function()
-
-    local player = game.Players.LocalPlayer
-
-    local char = player.Character or Player.CharacterAdded:wait()
-
-    local hrp = char:WaitForChild("HumanoidRootPart")
-
-    hrp.CFrame = CFrame.new(-8371.43359375, 6.79806327, 2858.88525390)
-
-    task.wait(0.2)
-
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-
-    task.wait(0.05)
-
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-
-end)
-
-
-
-MainTab:AddButton("Anti Lag", function()
-
-    local player = game.Players.LocalPlayer
-
-    local playerGui = player:WaitForChild("PlayerGui")
-
-    local lighting = game:GetService("Lighting")
-
-
-
-    for _, gui in pairs(playerGui:GetChildren()) do
-
-        if gui:IsA("ScreenGui") then
-
-            gui:Destroy()
-
-        end
-
-    end
-
-
-
-    local function darkenSky()
-
-        for _, v in pairs(lighting:GetChildren()) do
-
-            if v:IsA("Sky") then
-
-                v:Destroy()
-
-            end
-
-        end
-
-
-
-        local darkSky = Instance.new("Sky")
-
-        darkSky.Name = "DarkSky"
-
-        darkSky.SkyboxBk = "rbxassetid://0"
-
-        darkSky.SkyboxDn = "rbxassetid://0"
-
-        darkSky.SkyboxFt = "rbxassetid://0"
-
-        darkSky.SkyboxLf = "rbxassetid://0"
-
-        darkSky.SkyboxRt = "rbxassetid://0"
-
-        darkSky.SkyboxUp = "rbxassetid://0"
-
-        darkSky.Parent = lighting
-
-
-
-        lighting.Brightness = 0
-
-        lighting.ClockTime = 0
-
-        lighting.TimeOfDay = "00:00:00"
-
-        lighting.OutdoorAmbient = Color3.new(0, 0, 0)
-
-        lighting.Ambient = Color3.new(0, 0, 0)
-
-        lighting.FogColor = Color3.new(0, 0, 0)
-
-        lighting.FogEnd = 100
-
-
-
-        task.spawn(function()
-
-            while true do
-
-                wait(5)
-
-                if not lighting:FindFirstChild("DarkSky") then
-
-                    darkSky:Clone().Parent = lighting
-
-                end
-
-                lighting.Brightness = 0
-
-                lighting.ClockTime = 0
-
-                lighting.OutdoorAmbient = Color3.new(0, 0, 0)
-
-                lighting.Ambient = Color3.new(0, 0, 0)
-
-                lighting.FogColor = Color3.new(0, 0, 0)
-
-                lighting.FogEnd = 100
-
-            end
-
-        end)
-
-    end
-
-
-
-    local function removeParticleEffects()
-
-        for _, obj in pairs(workspace:GetDescendants()) do
-
-            if obj:IsA("ParticleEmitter") then
-
-                obj:Destroy()
-
-            end
-
-        end
-
-    end
-
-
-
-    local function removeLightSources()
-
-        for _, obj in pairs(workspace:GetDescendants()) do
-
-            if obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
-
-                obj:Destroy()
-
-            end
-
-        end
-
-    end
-
-
-
-    removeParticleEffects()
-
-    removeLightSources()
-
-    darkenSky()
-
-end)
-
-
-
-MainTab:AddButton("Equip Swift Samurai", function()
-
-    unequipPets()
-
-    equipPetsByName("Swift Samurai")
-
-end)
-
-
-
-
-
-local running = false
-
-
-
-task.spawn(function()
-
-    while true do
-
-        if running then
-
-            activateShake()
-
-            task.wait(900)
-
-        else
-
-            task.wait(1)
-
-        end
-
-    end
-
-end)
-
-
-
 local lockRunning = false
-
 local lockThread = nil
 
-
-
 local lockSwitch = MainTab:AddSwitch("Lock Position", function(state)
-
     lockRunning = state
-
     if lockRunning then
-
         local player = game.Players.LocalPlayer
-
         local char = player.Character or player.CharacterAdded:Wait()
-
         local hrp = char:WaitForChild("HumanoidRootPart")
-
         local lockPosition = hrp.Position
 
-
-
         lockThread = coroutine.create(function()
-
             while lockRunning do
-
                 hrp.Velocity = Vector3.new(0, 0, 0)
-
                 hrp.RotVelocity = Vector3.new(0, 0, 0)
-
                 hrp.CFrame = CFrame.new(lockPosition)
-
                 wait(0.05) 
-
             end
-
         end)
 
-
-
         coroutine.resume(lockThread)
-
     end
-
 end)
-
 lockSwitch:Set(false)
 
 
+MainTab:AddLabel("Misc:").TextSize = 22
 
 local walkonwaterSwicth =MainTab:AddSwitch("Walk on Water", function(bool)
-
     for _, part in ipairs(parts) do
-
         if part and part.Parent then
-
             part.CanCollide = bool
-
         end
-
     end
-
 end)
-
 walkonwaterSwicth:Set(true)
 
-
-
 local timeDropdown = MainTab:AddDropdown("Change Time", function(selection)
-
     local lighting = game:GetService("Lighting")
-
     
-
     if selection == "Night" then
-
         lighting.ClockTime = 0
-
     elseif selection == "Day" then
-
         lighting.ClockTime = 12
-
     elseif selection == "Midnight" then
-
         lighting.ClockTime = 6
-
     end
-
 end)
 
-
-
 timeDropdown:Add("Night")
-
 timeDropdown:Add("Day")
-
 timeDropdown:Add("Midnight")
 
 SpecsTab:AddLabel("Player Stats:").TextSize = 24
