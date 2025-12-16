@@ -238,16 +238,6 @@ local wLabel = infoTab:AddLabel("VERSION//2.0.0")
 wLabel.TextSize = 30
 wLabel.Font = Enum.Font.Arcade
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local Lighting = game:GetService("Lighting")
-
-local LocalPlayer = Players.LocalPlayer
-local Player = LocalPlayer
-
-local MainTab = window:AddTab("Main")
 MainTab:AddLabel("Settings:").TextSize = 22
 
 local spinwheelSwitch = MainTab:AddSwitch("Spin Fortune Wheel", function(bool)
