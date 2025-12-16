@@ -392,24 +392,6 @@ local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
 end)
 antiKnockbackSwitch:Set(true)
 
-local autoEggSwitch = MainTab:AddSwitch("Auto Egg", function(state)
-    isAutoEggRunning = state
-    if state then
-        activateProteinEgg()
-    end
-end)
-autoEggSwitch:Set(false)
-
-MainTab:AddButton("Jungle Squat",function()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = CFrame.new(-8371.43359375, 6.79806327, 2858.88525390)
-    task.wait(0.2)
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false)
-    task.wait(0.05)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false)
-end)
-
 MainTab:AddButton("Anti Lag", function()
     local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -480,14 +462,6 @@ MainTab:AddButton("Anti Lag", function()
     removeLightSources()
     darkenSky()
 end)
-
-MainTab:AddButton("Equip Swift Samurai", function()
-    equipPetsByName("Swift Samurai")
-end)
-
-local lockRunning = false
-local lockThread = nil
-local lockPosition = nil
 
 local lockSwitch = MainTab:AddSwitch("Lock Position", function(state)
     lockRunning = state
