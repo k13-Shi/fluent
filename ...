@@ -398,6 +398,7 @@ local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
 end)
 antiKnockbackSwitch:Set(true)
 
+
 local lockRunning = false
 local lockThread = nil
 
