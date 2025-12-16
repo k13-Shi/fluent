@@ -397,7 +397,7 @@ local antiKnockbackSwitch = MainTab:AddSwitch("Anti Fling", function(bool)
 end)
 antiKnockbackSwitch:Set(true)
 
-local MainTab:AddSwitch("Fast Rebirth", function(state)
+MainTab:AddSwitch("Fast Rebirth", function(state)
     isRunning = state
     
     if state then
